@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { ProductShimmerGrid } from "@/components/ProductListShimmer";
 export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -90,16 +91,20 @@ export default function Index() {
         </ScrollView>
       </View>
 
-      <FlashList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        estimatedItemSize={200}
-        numColumns={2}
-        contentContainerStyle={{ padding: 8 }}
-        keyExtractor={(item) => item.id.toString()}
-        onRefresh={refetch}
-        refreshing={isRefetching}
-      />
+      {isLoading ? (
+        <ProductShimmerGrid />
+      ) : (
+        <FlashList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          estimatedItemSize={200}
+          numColumns={2}
+          contentContainerStyle={{ padding: 8 }}
+          keyExtractor={(item) => item.id.toString()}
+          onRefresh={refetch}
+          refreshing={isRefetching}
+        />
+      )}
     </View>
   );
 }
