@@ -1,4 +1,5 @@
 import { ProductDetailsShimmer } from "@/components/ProductDetailsShimmer";
+import useCartStore from "@/store/cartStore";
 import { getProduct } from "@/utils/api";
 import { COLORS } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const Page = () => {
   const { id } = useLocalSearchParams();
   const { bottom } = useSafeAreaInsets();
+  const { addProduct } = useCartStore();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
@@ -32,7 +34,9 @@ const Page = () => {
     return <Text>Product not found</Text>;
   }
 
-  const handleAddToCart = () => {};
+  const handleAddToCart = () => {
+    addProduct(product);
+  };
 
   return (
     <View style={styles.container}>
