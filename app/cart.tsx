@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   Alert,
+  Button,
   FlatList,
   Platform,
   StyleSheet,
@@ -13,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import * as Sentry from "@sentry/react-native";
 const Page = () => {
   const { products, total, clearCart } = useCartStore();
   const { bottom } = useSafeAreaInsets();
@@ -48,6 +49,14 @@ const Page = () => {
             ) : null}
           </>
         )}
+        ListFooterComponent={
+          <Button
+            title="Test ERROR"
+            onPress={() => {
+              Sentry.captureException(new Error("Test Error"));
+            }}
+          />
+        }
       />
 
       <TouchableOpacity
