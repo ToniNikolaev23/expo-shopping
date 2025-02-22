@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
+          <string>toniapp</string>
           <string>com.toninikolaev23.shoppingapp</string>
         </array>
       </dict>

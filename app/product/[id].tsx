@@ -9,6 +9,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import {
   Platform,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -38,9 +39,38 @@ const Page = () => {
     addProduct(product);
   };
 
+  const onShare = async () => {
+    console.log("SHARE");
+    const url = `toniapp://product/${product.id}`;
+    if (Platform.OS === "ios") {
+      await Share.share({
+        url,
+        message: `Check out this product on ${url}`,
+      });
+    } else {
+      await Share.share({
+        message: `Check out this product on ${url}`,
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: product.title }} />
+      <Stack.Screen
+        options={{
+          title: product.title,
+          headerRight: () => (
+            <TouchableOpacity onPress={onShare}>
+              <Ionicons
+                name="share-social"
+                size={24}
+                color={COLORS.primary}
+                style={{ marginRight: 16 }}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView>
         <Image
           source={{ uri: product.image }}
