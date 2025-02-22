@@ -39,7 +39,7 @@ const useCartStore = create<CartState>()(
           } else {
             return {
               products: [...state.products, { ...product, quantity: 1 }],
-              total: newTotal,
+              total: +newTotal.toFixed(2),
               count: newCount,
             };
           }
@@ -59,7 +59,7 @@ const useCartStore = create<CartState>()(
                 return p;
               })
               .filter((p) => p.quantity > 0),
-            total: newTotal,
+            total: +newTotal.toFixed(2),
             count: newCount,
           };
         });

@@ -9,8 +9,13 @@ import ReanimatedSwipeable, {
   SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, {
+  Easing,
   SharedValue,
   useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 interface CartItemProps {
   item: Product & { quantity: number };
@@ -38,8 +43,22 @@ const LeftActions = (
 const CartItem = ({ item }: CartItemProps) => {
   const { addProduct, reduceProduct } = useCartStore();
   const reanimatedRef = useRef<SwipeableMethods>(null);
+  const opacityAnim = useSharedValue(1);
+  const scaleAnim = useSharedValue(1);
+  const heightAnim = useSharedValue(80);
 
-  const onShouldDelete = () => {
+  const onShouldDelete = async () => {
+    opacityAnim.value = withTiming(0, {
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+    });
+
+    heightAnim.value = withTiming(0, {
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
     reanimatedRef.current?.close();
     for (let i = 0; i < item.quantity; i++) {
       reduceProduct(item);
@@ -53,40 +72,64 @@ const CartItem = ({ item }: CartItemProps) => {
     if (type === "decrement") {
       reduceProduct(item);
     }
+
+    scaleAnim.value = withSequence(
+      withSpring(1.2, { damping: 2, stiffness: 80 }),
+      withSpring(1, { damping: 2, stiffness: 80 })
+    );
   };
+
+  const quantityAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleAnim.value }],
+    };
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacityAnim.value,
+      height: heightAnim.value,
+    };
+  });
   return (
-    <ReanimatedSwipeable
-      ref={reanimatedRef}
-      renderLeftActions={(progress, dragX) =>
-        LeftActions(progress, dragX, onShouldDelete)
-      }
-      leftThreshold={50}
-      friction={2}
-      containerStyle={styles.swipeable}
-    >
-      <View style={styles.cartItemContainer}>
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <View style={styles.itemContainer}>
-          <Text style={styles.cartItemName}>{item.title}</Text>
-          <Text>Price: ${item.price}</Text>
+    <Reanimated.View style={animatedStyle}>
+      <ReanimatedSwipeable
+        ref={reanimatedRef}
+        renderLeftActions={(progress, dragX) =>
+          LeftActions(progress, dragX, onShouldDelete)
+        }
+        leftThreshold={50}
+        friction={2}
+        containerStyle={styles.swipeable}
+      >
+        <View style={styles.cartItemContainer}>
+          <Image source={{ uri: item.image }} style={styles.image} />
+          <View style={styles.itemContainer}>
+            <Text style={styles.cartItemName}>{item.title}</Text>
+            <Text>Price: ${item.price}</Text>
+          </View>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              onPress={() => handleQuantityChanged("decrement")}
+              style={styles.quantityButton}
+            >
+              <Ionicons name="remove" size={24} color="black" />
+            </TouchableOpacity>
+            <Reanimated.Text
+              style={[styles.cartItemQuantity, quantityAnimatedStyle]}
+            >
+              {item.quantity}
+            </Reanimated.Text>
+            <TouchableOpacity
+              onPress={() => handleQuantityChanged("increment")}
+              style={styles.quantityButton}
+            >
+              <Ionicons name="add" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity
-            onPress={() => handleQuantityChanged("decrement")}
-            style={styles.quantityButton}
-          >
-            <Ionicons name="remove" size={24} color="black" />
-          </TouchableOpacity>
-          <Text style={styles.cartItemQuantity}>{item.quantity}</Text>
-          <TouchableOpacity
-            onPress={() => handleQuantityChanged("increment")}
-            style={styles.quantityButton}
-          >
-            <Ionicons name="add" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ReanimatedSwipeable>
+      </ReanimatedSwipeable>
+    </Reanimated.View>
   );
 };
 
