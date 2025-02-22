@@ -40,6 +40,7 @@ const Page = () => {
         data={products}
         renderItem={({ item }) => <CartItem item={item} />}
         keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ gap: 10 }}
         ListHeaderComponent={() => (
           <>
             {products.length ? (
